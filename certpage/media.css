@@ -1,0 +1,61 @@
+@media(max-width:920px){
+    .Badges{
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: none;
+
+        
+    }
+    .plzwork{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    .Badge{
+        max-width: fit-content;
+
+    }
+
+
+    .cert{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding-left:10px ;
+        padding-right:10px ;
+        margin-bottom: 30px;
+    }
+    .certificates{
+        display: grid;
+        grid-template-columns: 1fr;
+        max-width: 100%;
+        
+
+    }
+
+    .activeCert{
+        max-width: 100%;
+        
+    }
+
+  
+    .nullCert{
+        width: 100%;
+    }
+}
+
+@media(min-width:920px){
+    .heroSection{
+        padding-left:20px ;
+        padding-right:20px ;
+    }
+
+    .activeCert:active{
+        max-width: 65%;
+        position: absolute;
+        top: 10px;
+        z-index: 3;
+        overflow:hidden;
+    
+    }
+}

@@ -1,0 +1,372 @@
+*{
+    margin: 0;
+    box-sizing: border-box;
+    font-family: h;
+     /* border: solid black 1px;  */
+    color: white;
+}
+
+body{
+
+    background-color: #161923;}
+
+
+@media (min-width: 768px) {
+  body {
+    transform: scale(0.85);
+    transform-origin: top left;
+    width: 117.6471%;
+  }
+
+  html, body {
+    overflow: hidden;
+  }
+}
+
+p{
+    font-family: "Rubik", sans-serif;
+}
+
+h1{
+    font-family: "Josefin Sans", sans-serif;
+}
+
+h4{
+    font-family: "Rubik", sans-serif;
+    font-size: 12px;
+    font-weight: 100;
+   opacity: 30%;
+}
+
+
+.mainGrid {
+
+    display: grid;
+    grid-template-columns: 3fr 1fr;
+    max-width: 1300px;
+    grid-gap: 10px;
+
+    max-height: 100%;
+    margin: 0 auto;
+    margin-top: 1.3em;
+
+    
+}
+
+.div1 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr ;
+    grid-template-rows: minmax(100px, auto);
+    grid-gap: 18px;
+}
+
+.heroIntro{
+    grid-column: 1/4;
+    
+    display: grid;
+    grid-template-columns: 3fr 1fr;
+    gap: 1em;
+    background: #282D3F;
+    border: solid  #2B79A2 1px;
+    border-radius: 10px;
+    
+    padding: 1.3em;
+    padding-right: 40px;
+}
+
+.heroIntro:hover{
+    border: solid #384E63 1px ;
+}
+
+.heroIntro > img{
+    max-width: 12em;
+    border-radius: 50%;
+}
+
+.text-container{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    
+}
+.text-container > p{
+
+    font-size: 20px;
+    line-height: 28px;
+
+    font-weight: 300;
+    
+}
+.text-container > h5{
+    font-family: "Josefin Sans", sans-serif;
+    font-size: 14px;
+}
+
+.text-container > h4{
+      margin-bottom: 2em;
+}
+
+.logoCon{
+    max-width: fit-content;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-gap: 10px;
+}
+.logoCon > a{
+    border: solid #384E63 1px ;
+    display: flex;
+    width: 4em;
+    height: 2.5em;
+    text-align: center;
+    align-items: center;
+    justify-content: center;
+    
+    border-radius: 10px;
+
+}
+
+.logoCon > div{
+    border: solid #384E63 1px ;
+    display: flex;
+    width: 4em;
+    height: 2.5em;
+    text-align: center;
+    align-items: center;
+    justify-content: center;
+    
+    border-radius: 10px;
+
+}
+.logoCon > svg{
+    fill: white;
+    
+    
+}
+
+.otherStuff{
+    border: solid #2C2C2C 1px;
+    border-radius: 10px;
+    padding: 1.3em;
+    font-family: "Rubik", sans-serif;
+    background: #282D3F;
+}
+.otherStuff {
+    padding: 20px;
+    max-width: 900px;
+    margin: 0 auto;
+    font-family: inherit;
+}
+
+.skills-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 20px;
+    flex-wrap: wrap;
+
+}
+
+.skills-text {
+    flex: 1;
+    
+    min-width: 250px;
+    font-size: 19px;
+    line-height: 1.6;
+    font-family: "Rubik", sans-serif;
+}
+.skills-text p strong{
+        font-family: "Rubik", sans-serif;
+}
+.lang{
+        font-family: "Rubik", sans-serif;
+}
+.skills-image {
+    flex: 0 0 auto;
+    width: 120px;
+    text-align: right;
+}
+
+.skills-image img {
+    max-width: 100%;
+    height: auto;
+}
+
+@media (max-width: 600px) {
+    .skills-container {
+        flex-direction: column;
+        align-items: center;
+       
+    }
+
+    .skills-image {
+        text-align: center;
+        margin-top: 15px;
+    }
+}
+
+.otherStuff > span{
+    font-size: 20px;
+    font-weight: 500;
+    margin-bottom: 1em;
+    padding-bottom: 5px;
+}
+
+.otherStuff:hover{
+            border: solid #384E63 1px }
+
+.someProj:hover{
+    border: solid #384E63 1px ;
+}
+
+.contact:hover{
+    border: solid #384E63 1px ;
+}
+
+.about:hover{
+    border: solid #384E63 1px ;
+}
+
+.present:hover{
+    border: solid #384E63 1px ;
+}
+
+
+.otherStuff > h1{
+    font-size: 20px;
+    margin-bottom: 1em;
+}
+
+.otherStuff >p{
+    font-size: 16px;
+    opacity: 30%;
+    margin-bottom: 0.5em;
+}
+
+.linkList{
+    list-style: none;
+    font-family: "Rubik", sans-serif ;
+
+}
+.linkList > li{
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+.linkList > li >a{
+    text-decoration: none;
+    font-family: "Rubik", sans-serif ;
+    font-size: 16px
+}
+
+.duoGrid{
+    display: grid;
+    grid-template-columns: 1fr;
+    
+    grid-gap: 10px;
+}
+
+.someProj{
+    border: solid #2C2C2C 1px;
+    border-radius: 10px;
+    padding: 1.3em;
+   
+    background: #282D3F;
+}
+
+.someProj > h1{
+    font-size: 20px;
+    margin-bottom: 1em;
+}
+.someProj > a{
+    text-decoration: none;
+    font-size: 16px;
+    font-family: "Rubik", sans-serif ;
+    font-weight: 100;
+}
+.someProj > p{
+
+    opacity: 30%;
+    font-size: 16px;
+    margin-bottom:  5px;
+}
+
+.contact{
+    border: solid #2C2C2C 1px;
+    border-radius: 10px;
+    padding: 1.3em;
+   
+    background: #282D3F;
+}
+
+.contact > h1{
+    font-size: 20px;
+    margin-bottom: 1em;
+}
+
+.contactLinks >a{
+    text-decoration: none;
+    font-family: "Rubik", sans-serif ;
+    font-size: 16px;
+    margin-right: 10px;
+}
+
+.div2{
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto;
+    grid-row-gap: 0.5em;
+
+}
+
+.about{
+    background: #282D3F;
+    border: solid #2C2C2C 1px;
+    border-radius: 10px;
+    
+    padding: 1.3em;
+
+
+}
+
+.about>h1{
+    font-size: 20px;
+    margin-bottom: 0.5em;
+}
+
+.about>h1~p{
+    font-size: 18px;
+    margin-bottom: 0.8em;
+    font-weight: 200;
+}
+
+.about>div>li{
+    font-size: 16px;
+    font-family: "Rubik", sans-serif ;
+    padding-bottom: 0.5em;
+
+}
+
+.about>div{
+
+    margin-bottom: 1em;
+}
+
+.present{  
+    background: #282D3F;
+    border: solid #2C2C2C 1px;
+    border-radius: 10px;
+    
+    padding: 1.3em;
+
+}
+
+.present >h1{
+
+    font-size: 20px;
+    margin-bottom: 1em;
+}
+
+.present>p{
+
+    font-size: 12px;
+}
+

@@ -1,0 +1,45 @@
+@media(min-width:1024px){
+    .heroIntro{
+        grid-column: 1/4;
+
+    }    
+
+    .duoGrid{
+        grid-column: 2/4 ;
+    }
+}
+
+@media(max-width:1024px){
+    .mainGrid{
+        grid-template-columns:1fr ;
+    }
+    
+    .duoGrid{
+        grid-column: 2/4 ;
+    }
+    
+}
+
+@media(max-width:764px){
+
+    .mainGrid{
+
+        margin-left:1em ;
+        margin-right: 1em;
+    }
+    .div1{
+        display: flex;
+        flex-direction: column;
+    }
+
+
+    .heroIntro >img{
+        display: none;
+    }
+    .heroIntro{
+        grid-template-columns: 1fr;
+    }
+   
+
+
+}

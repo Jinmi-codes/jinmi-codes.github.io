@@ -1,0 +1,131 @@
+*{
+    margin: 0;
+    box-sizing: border-box;
+    font-family: h;
+     /* border: solid black 1px;  */
+    color: white;
+}
+body{
+
+    background-color: #161923;
+}
+p{
+    font-family: "Rubik", sans-serif;
+}
+
+h1{
+    font-family: "Josefin Sans", sans-serif;
+}
+
+h4{
+    font-family: "Rubik", sans-serif;
+    font-size: 12px;
+    font-weight: 100;
+   opacity: 30%;
+}
+
+
+
+.heroSection{
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr ;
+    max-width: 1100px;
+    grid-gap: 10px;
+
+    max-height: 100%;
+    margin: 0 auto;
+    margin-top: 1.3em;
+
+}
+
+.heroSection h1{
+    font-family: "Josefin Sans", sans-serif;
+    font-size: 20px;
+}
+
+.Badge{
+    display: flex;
+    flex-direction: column;
+
+    gap: 10px;
+}
+
+.Badges{
+    
+
+    background: #282D3F;
+    border: solid  #2B79A2 1px;
+    border-radius: 10px;
+    
+    padding: 1em;
+  
+
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    gap: 10px;
+}
+
+
+.emptyBadge{
+    width: 102px;
+    height: 102px;
+    border: solid #2C2C2C 1px;
+    border-radius: 10px; 
+    background-color: #161923;
+}
+
+
+.cert{
+    margin-top: 2em;
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 10px;
+}
+
+.certificates{
+    background: #282D3F;
+    border: solid #2C2C2C 1px;
+    border-radius: 10px;
+    
+    padding: 1em;
+  
+
+    display: flex;
+    flex-direction: row;
+    /* justify-content: space-evenly; */
+    gap: 10px;
+    overflow:hidden;
+    justify-content: center;
+    flex-wrap: wrap;
+
+    
+}
+
+.activeCert{
+    border: solid #2C2C2C 1px;
+    max-width: 400px;
+    border-radius: 10px;
+
+}
+
+
+.nullCert{
+    border: solid #2C2C2C 1px;
+    width: 400px;
+    height: 280px;
+    border-radius: 10px;
+
+    background:  #161923;
+}
+
+
+.info{
+        font-family: "Rubik", sans-serif;
+        font-size: 12px;
+        font-weight: 100;
+        opacity: 30%;
+}
