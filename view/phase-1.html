@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Phase 1 — Linux & Networking Depth</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --bg2: #161b27;
+    --bg3: #1c2333;
+    --border: rgba(255,255,255,0.08);
+    --border2: rgba(255,255,255,0.14);
+    --text: #e8eaf0;
+    --muted: #7a8099;
+    --subtle: #4a5068;
+    --purple: #a78bfa;
+    --purple-dim: rgba(167,139,250,0.12);
+    --green: #4ade80;
+    --green-dim: rgba(74,222,128,0.10);
+    --amber: #fbbf24;
+    --amber-dim: rgba(251,191,36,0.10);
+    --teal: #2dd4bf;
+    --teal-dim: rgba(45,212,191,0.10);
+    --coral: #fb7185;
+    --coral-dim: rgba(251,113,133,0.10);
+    --blue: #60a5fa;
+    --blue-dim: rgba(96,165,250,0.10);
+    --radius: 10px;
+    --radius-sm: 6px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-size: 15px;
+    line-height: 1.65;
+    min-height: 100vh;
+  }
+
+  /* ── Header ── */
+  .hero {
+    border-bottom: 1px solid var(--border);
+    padding: 3rem 2.5rem 2.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -80px; left: -80px;
+    width: 360px; height: 360px;
+    background: radial-gradient(circle, rgba(167,139,250,0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-eyebrow {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--purple);
+    margin-bottom: 0.75rem;
+  }
+  .hero-title {
+    font-size: clamp(1.8rem, 4vw, 2.6rem);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    color: #fff;
+    margin-bottom: 0.75rem;
+  }
+  .hero-title span { color: var(--purple); }
+  .hero-sub {
+    color: var(--muted);
+    font-size: 15px;
+    max-width: 560px;
+    margin-bottom: 1.5rem;
+  }
+  .hero-pills { display: flex; flex-wrap: wrap; gap: 8px; }
+  .pill {
+    font-size: 12px;
+    padding: 4px 12px;
+    border-radius: 999px;
+    border: 1px solid var(--border2);
+    color: var(--muted);
+  }
+  .pill.hi { border-color: var(--purple); color: var(--purple); background: var(--purple-dim); }
+
+  /* ── Nav tabs ── */
+  .tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid var(--border);
+    padding: 0 2.5rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab {
+    padding: 0.9rem 1.2rem;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+    transition: color .2s, border-color .2s;
+    background: none;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+  }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--purple); border-bottom-color: var(--purple); }
+
+  /* ── Content panels ── */
+  .panel { display: none; padding: 2rem 2.5rem; }
+  .panel.active { display: block; }
+
+  /* ── Section headings ── */
+  .section-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--subtle);
+    margin-bottom: 1rem;
+    margin-top: 2rem;
+  }
+  .section-label:first-child { margin-top: 0; }
+
+  /* ── Cards ── */
+  .card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 12px;
+  }
+  .card:last-child { margin-bottom: 0; }
+  .card-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 0.75rem;
+  }
+  .card-icon {
+    width: 36px; height: 36px;
+    border-radius: var(--radius-sm);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 17px;
+    flex-shrink: 0;
+  }
+  .card-title { font-size: 15px; font-weight: 600; color: #fff; margin-bottom: 2px; }
+  .card-sub { font-size: 12px; color: var(--muted); }
+  .card-body { font-size: 13.5px; color: var(--muted); line-height: 1.7; }
+  .tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .tag {
+    font-size: 11px;
+    padding: 3px 9px;
+    border-radius: 4px;
+    font-weight: 500;
+  }
+
+  /* accent variants */
+  .acc-purple .card-icon { background: var(--purple-dim); color: var(--purple); }
+  .acc-green  .card-icon { background: var(--green-dim);  color: var(--green);  }
+  .acc-amber  .card-icon { background: var(--amber-dim);  color: var(--amber);  }
+  .acc-teal   .card-icon { background: var(--teal-dim);   color: var(--teal);   }
+  .acc-coral  .card-icon { background: var(--coral-dim);  color: var(--coral);  }
+  .acc-blue   .card-icon { background: var(--blue-dim);   color: var(--blue);   }
+  .acc-purple .tag { background: var(--purple-dim); color: var(--purple); }
+  .acc-green  .tag { background: var(--green-dim);  color: var(--green);  }
+  .acc-amber  .tag { background: var(--amber-dim);  color: var(--amber);  }
+  .acc-teal   .tag { background: var(--teal-dim);   color: var(--teal);   }
+  .acc-coral  .tag { background: var(--coral-dim);  color: var(--coral);  }
+  .acc-blue   .tag { background: var(--blue-dim);   color: var(--blue);   }
+
+  /* ── Timetable ── */
+  .week-block {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+  .week-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 1rem 1.25rem;
+    background: var(--bg3);
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    user-select: none;
+  }
+  .week-num {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 3px 10px;
+    border-radius: 4px;
+    flex-shrink: 0;
+  }
+  .week-title { font-weight: 600; font-size: 14px; color: #fff; }
+  .week-focus { font-size: 12px; color: var(--muted); margin-left: auto; }
+  .week-chevron { color: var(--subtle); font-size: 16px; transition: transform .2s; }
+  .week-chevron.open { transform: rotate(180deg); }
+  .week-body { display: none; padding: 1rem 1.25rem; }
+  .week-body.open { display: block; }
+
+  .day-row {
+    display: grid;
+    grid-template-columns: 90px 1fr;
+    gap: 0;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    align-items: start;
+  }
+  .day-row:last-child { border-bottom: none; }
+  .day-name { font-size: 12px; font-weight: 600; color: var(--muted); padding-top: 2px; }
+  .day-tasks { font-size: 13px; color: var(--text); line-height: 1.6; }
+  .day-tasks .topic { color: var(--purple); font-weight: 500; }
+  .day-tasks .resource { color: var(--teal); font-size: 12px; }
+  .day-tasks .practice { color: var(--amber); font-size: 12px; }
+  .day-off { color: var(--subtle); font-style: italic; font-size: 13px; }
+
+  /* phase groups for weeks */
+  .phase-a .week-num { background: var(--purple-dim); color: var(--purple); }
+  .phase-b .week-num { background: var(--green-dim);  color: var(--green); }
+  .phase-c .week-num { background: var(--amber-dim);  color: var(--amber); }
+  .phase-d .week-num { background: var(--teal-dim);   color: var(--teal); }
+
+  /* ── Resources table ── */
+  .res-table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  .res-table th {
+    text-align: left;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--subtle);
+    padding: 0 12px 10px;
+  }
+  .res-table th:first-child { padding-left: 0; }
+  .res-table td {
+    padding: 10px 12px;
+    border-top: 1px solid var(--border);
+    vertical-align: top;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+  .res-table td:first-child { padding-left: 0; color: var(--text); font-weight: 500; }
+  .free-badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: var(--green-dim);
+    color: var(--green);
+    letter-spacing: 0.05em;
+    margin-left: 6px;
+  }
+  .paid-badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: var(--amber-dim);
+    color: var(--amber);
+    letter-spacing: 0.05em;
+    margin-left: 6px;
+  }
+
+  /* ── Lab projects ── */
+  .project-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 12px;
+    position: relative;
+    overflow: hidden;
+  }
+  .project-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+  }
+  .proj-purple::before { background: var(--purple); }
+  .proj-green::before  { background: var(--green); }
+  .proj-amber::before  { background: var(--amber); }
+  .proj-teal::before   { background: var(--teal); }
+  .project-num { font-size: 11px; font-weight: 700; color: var(--subtle); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px; }
+  .project-title { font-size: 15px; font-weight: 600; color: #fff; margin-bottom: 6px; }
+  .project-body { font-size: 13.5px; color: var(--muted); line-height: 1.7; }
+  .project-goals { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 6px; }
+  .goal-tag { font-size: 11px; padding: 3px 9px; border-radius: 4px; background: var(--bg3); color: var(--muted); border: 1px solid var(--border); }
+
+  /* ── Checklist ── */
+  .checklist { list-style: none; }
+  .checklist li {
+    display: flex;
+    gap: 10px;
+    padding: 9px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13.5px;
+    color: var(--muted);
+    align-items: flex-start;
+    line-height: 1.5;
+  }
+  .checklist li:last-child { border-bottom: none; }
+  .checklist li::before {
+    content: '○';
+    color: var(--subtle);
+    flex-shrink: 0;
+    margin-top: 1px;
+    font-size: 13px;
+  }
+  .checklist li strong { color: var(--text); font-weight: 600; }
+
+  /* ── Responsive ── */
+  @media (max-width: 600px) {
+    .hero { padding: 2rem 1.25rem 1.75rem; }
+    .tabs { padding: 0 1.25rem; }
+    .panel { padding: 1.5rem 1.25rem; }
+    .day-row { grid-template-columns: 75px 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-eyebrow">Infrastructure Engineer Roadmap · Phase 1 of 5</div>
+  <h1 class="hero-title">Linux & <span>Networking</span><br>Depth</h1>
+  <p class="hero-sub">Your foundation. Every cloud instance, container, and CI runner is a Linux box on a network. This phase turns familiarity into mastery — the kind that makes everything else click.</p>
+  <div class="hero-pills">
+    <span class="pill hi">~5 months</span>
+    <span class="pill hi">~10 hrs/week</span>
+    <span class="pill">Linux admin</span>
+    <span class="pill">TCP/IP internals</span>
+    <span class="pill">Bash scripting</span>
+    <span class="pill">Home lab</span>
+  </div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('overview', this)">Overview</button>
+  <button class="tab" onclick="switchTab('timetable', this)">Timetable</button>
+  <button class="tab" onclick="switchTab('lab', this)">Lab projects</button>
+  <button class="tab" onclick="switchTab('resources', this)">Resources</button>
+  <button class="tab" onclick="switchTab('checklist', this)">Done when...</button>
+</div>
+
+<!-- ═══════════════════════════ OVERVIEW ═══════════════════════════ -->
+<div class="panel active" id="panel-overview">
+
+  <div class="section-label">The four pillars</div>
+
+  <div class="card acc-purple">
+    <div class="card-header">
+      <div class="card-icon">🐧</div>
+      <div>
+        <div class="card-title">Linux administration</div>
+        <div class="card-sub">Weeks 1–8 · The operating system you'll live in</div>
+      </div>
+    </div>
+    <div class="card-body">
+      You already know Linux casually. Now go structural. Learn how the OS actually works — the boot process, how systemd manages services, how the kernel exposes hardware to user space. Understand permissions at the inode level, not just chmod numbers. Know how to diagnose a system that's slow, full, or broken — from the command line, with no GUI. This is the layer everything else sits on.
+    </div>
+    <div class="tag-row">
+      <span class="tag">Boot process & systemd</span>
+      <span class="tag">File system & inodes</span>
+      <span class="tag">Process management</span>
+      <span class="tag">Users & permissions</span>
+      <span class="tag">Storage & LVM</span>
+      <span class="tag">Package management</span>
+      <span class="tag">Logging & journald</span>
+      <span class="tag">SSH hardening</span>
+    </div>
+  </div>
+
+  <div class="card acc-green">
+    <div class="card-header">
+      <div class="card-icon">🌐</div>
+      <div>
+        <div class="card-title">Networking internals</div>
+        <div class="card-sub">Weeks 6–14 · Overlaps with Linux — runs concurrently</div>
+      </div>
+    </div>
+    <div class="card-body">
+      You have Security+ networking knowledge — now operationalise it. Know what actually happens at the packet level when you type a URL. Be able to subnet fast in your head. Understand how DNS resolution actually works, step by step. Configure a firewall, a static route, a VLAN. Capture and read real traffic with Wireshark or tcpdump. This depth is what separates someone who "knows networking" from someone who can debug it at 2am in production.
+    </div>
+    <div class="tag-row">
+      <span class="tag">OSI model in practice</span>
+      <span class="tag">TCP/IP internals</span>
+      <span class="tag">Subnetting (fast)</span>
+      <span class="tag">DNS deep dive</span>
+      <span class="tag">DHCP & NAT</span>
+      <span class="tag">VLANs & routing</span>
+      <span class="tag">iptables & nftables</span>
+      <span class="tag">Packet capture</span>
+      <span class="tag">TLS internals</span>
+    </div>
+  </div>
+
+  <div class="card acc-amber">
+    <div class="card-header">
+      <div class="card-icon">📜</div>
+      <div>
+        <div class="card-title">Bash scripting (production-grade)</div>
+        <div class="card-sub">Weeks 3–12 · Woven through everything</div>
+      </div>
+    </div>
+    <div class="card-body">
+      You write Python. Bash is different — it's glue. Infrastructure automation is 80% shell scripts. Learn it properly: error handling, argument parsing, logging, idempotency. Write scripts you'd actually run on a server. The goal isn't to replace Python — it's to know when bash is the right tool (startup scripts, cron, one-liners in a pipeline) and write it well when it is.
+    </div>
+    <div class="tag-row">
+      <span class="tag">Variables & arrays</span>
+      <span class="tag">Conditionals & loops</span>
+      <span class="tag">Functions</span>
+      <span class="tag">Error handling (set -euo pipefail)</span>
+      <span class="tag">Stdin/stdout/stderr</span>
+      <span class="tag">Cron & scheduling</span>
+      <span class="tag">awk, sed, grep, cut</span>
+    </div>
+  </div>
+
+  <div class="card acc-teal">
+    <div class="card-header">
+      <div class="card-icon">🖥️</div>
+      <div>
+        <div class="card-title">Home lab</div>
+        <div class="card-sub">Weeks 1–20 · Runs the entire phase</div>
+      </div>
+    </div>
+    <div class="card-body">
+      The lab is not optional. Reading and watching will get you 30% of the way. Breaking and fixing real systems gets you the rest. You need a hypervisor running real VMs — Proxmox on an old PC is the gold standard (free, enterprise-grade). Failing that, VirtualBox on your current machine works fine. You'll spin up Ubuntu Server, Debian, and Rocky Linux (RHEL-based) — knowing both Debian and RHEL families is expected at most infra jobs.
+    </div>
+    <div class="tag-row">
+      <span class="tag">Proxmox (recommended)</span>
+      <span class="tag">VirtualBox (fallback)</span>
+      <span class="tag">Ubuntu Server 24 LTS</span>
+      <span class="tag">Rocky Linux 9</span>
+      <span class="tag">pfSense (router VM)</span>
+      <span class="tag">Multiple VMs networked</span>
+    </div>
+  </div>
+
+  <div class="section-label" style="margin-top:2rem">What to avoid</div>
+  <div class="card" style="background:var(--bg2)">
+    <div class="card-body" style="color:var(--muted)">
+      <strong style="color:#fff; display:block; margin-bottom:8px">Don't rush toward certs prematurely.</strong>
+      The CompTIA Linux+ and LPIC-1 exist, but they're not the goal of this phase. Understanding is. The cert is a byproduct of actually knowing the material deeply. Memorising dumps is worthless here — infra interviews test whether you can reason through real scenarios, not recite acronyms.<br><br>
+      <strong style="color:#fff; display:block; margin-bottom:8px; margin-top:12px">Don't skip the lab because it's inconvenient.</strong>
+      Every topic in this phase should be practiced in a real environment, not just read about. If you're reading about LVM and haven't actually created, extended, and deleted a logical volume — you don't know LVM yet.
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ TIMETABLE ═══════════════════════════ -->
+<div class="panel" id="panel-timetable">
+
+  <div style="background:var(--bg2); border:1px solid var(--border); border-radius:var(--radius); padding:1rem 1.25rem; margin-bottom:1.5rem;">
+    <div style="font-size:13px; color:var(--muted); line-height:1.7">
+      <strong style="color:var(--text)">Schedule assumptions:</strong> ~2 hours on weekday evenings (Mon–Fri) + one longer session on Saturday (~3–4 hrs). Sunday is rest/review — never skip it, recovery is part of learning. This comes to roughly 13–14 hrs/week. Adjust to your university load — when exams hit, drop to 1 hr/weekday and compensate on breaks. Consistency over intensity.
+    </div>
+  </div>
+
+  <div class="section-label">Module A — Linux foundations (Weeks 1–4)</div>
+
+  <!-- WEEK 1 -->
+  <div class="week-block phase-a">
+    <div class="week-header" onclick="toggleWeek(this)">
+      <span class="week-num">Week 1</span>
+      <span class="week-title">Linux boot, filesystem, and the shell</span>
+      <span class="week-focus">Core navigation</span>
+      <span class="week-chevron open">▾</span>
+    </div>
+    <div class="week-body open">
+      <div class="day-row"><div class="day-name">Monday</div><div class="day-tasks"><span class="topic">Boot process:</span> BIOS → GRUB → kernel → initrd → systemd. Watch it happen in your VM. <span class="resource">→ Linux Journey: Getting Started</span></div></div>
+      <div class="day-row"><div class="day-name">Tuesday</div><div class="day-tasks"><span class="topic">Filesystem hierarchy:</span> Every directory in / and what lives there. Mount points, inodes, hard vs symbolic links. <span class="resource">→ Linux Journey: Filesystem</span></div></div>
+      <div class="day-row"><div class="day-name">Wednesday</div><div class="day-tasks"><span class="topic">Shell mastery:</span> Navigation, file ops, stdin/stdout/stderr, pipes, redirection. <span class="practice">Practice: 20 shell exercises on OverTheWire: Bandit (levels 0–10)</span></div></div>
+      <div class="day-row"><div class="day-name">Thursday</div><div class="day-tasks"><span class="topic">Text tools:</span> grep, awk, sed, cut, sort, uniq, tr, wc, find, xargs — learn one deeply per day this week. <span class="resource">→ The Linux Command Line book, Ch 19–20</span></div></div>
+      <div class="day-row"><div class="day-name">Friday</div><div class="day-tasks"><span class="topic">VIM:</span> Not just basics — splits, macros, search-replace, .vimrc. You'll live in vim remotely. <span class="resource">→ vimtutor (run it), then vim-adventures.com</span></div></div>
+      <div class="day-row"><div class="day-name">Saturday</div><div class="day-tasks"><span class="topic">Lab session:</span> Set up your first Ubuntu Server 24 LTS VM from scratch. No GUI. SSH into it from your host machine. Complete OverTheWire Bandit levels 10–20. Write 3 bash one-liners to automate something tedious on the system.</div></div>
+      <div class="day-row"><div class="day-name">Sunday</div><div class="day-tasks day-off">Rest. Optional: skim the week's topics, no new material.</div></div>
+    </div>
+  </div>
+
+  <!-- WEEK 2 -->
+  <div class="week-block phase-a">
+    <div class="week-header" onclick="toggleWeek(this)">
+      <span class="week-num">Week 2</span>
+      <span class="week-title">Users, permissions & process management</span>
+      <span class="week-focus">System internals</span>
+      <span class="week-chevron">▾</span>
+    </div>
+    <div class="week-body">
+      <div class="day-row"><div class="day-name">Monday</div><div class="day-tasks"><span class="topic">Users & groups:</span> /etc/passwd, /etc/shadow, /etc/group structure. useradd, usermod, userdel, passwd, id, who, last. Understand UID/GID 0.</div></div>
+      <div class="day-row"><div class="day-name">Tuesday</div><div class="day-tasks"><span class="topic">Permissions:</span> rwx bits, octal notation, setuid/setgid/sticky bit, umask, ACLs with getfacl/setfacl. <span class="practice">Practice: set up a shared directory with group permissions correctly</span></div></div>
+      <div class="day-row"><div class="day-name">Wednesday</div><div class="day-tasks"><span class="topic">Processes:</span> ps, top, htop, pstree. fork(), exec(), orphans, zombies. Signals — SIGTERM, SIGKILL, SIGHUP and when to use each. kill, pkill, killall.</div></div>
+      <div class="day-row"><div class="day-name">Thursday</div><div class="day-tasks"><span class="topic">Job control & scheduling:</span> bg, fg, jobs, nohup, screen/tmux. cron syntax deeply — crontab -e, /etc/cron.d/, /etc/cron.daily/. <span class="practice">Write a cron job that logs disk usage daily</span></div></div>
+      <div class="day-row"><div class="day-name">Friday</div><div class="day-tasks"><span class="topic">sudo & PAM:</span> /etc/sudoers properly (visudo), sudoers.d/, specific command grants without full root. PAM basics — pluggable auth modules.</div></div>
+      <div class="day-row"><div class="day-name">Saturday</div><div class="day-tasks"><span class="topic">Lab:</span> Create 3 users with different privilege levels. Set up a shared project directory with correct group permissions. Write a monitoring script that alerts (echo to a log) when a process dies. Practice killing and restarting services manually.</div></div>
+      <div class="day-row"><div class="day-name">Sunday</div><div class="day-tasks day-off">Rest.</div></div>
+    </div>
+  </div>
+
+  <!-- WEEK 3 -->
+  <div class="week-block phase-a">
+    <div class="week-header" onclick="toggleWeek(this)">
+      <span class="week-num">Week 3</span>
+      <span class="week-title">systemd, services & logging</span>
+      <span class="week-focus">Service management</span>
+      <span class="week-chevron">▾</span>
+    </div>
+    <div class="week-body">
+      <div class="day-row"><div class="day-name">Monday</div><div class="day-tasks"><span class="topic">systemd deep dive:</span> Units, targets, dependencies. systemctl start/stop/enable/disable/status/reload. Understand the difference between restart and reload.</div></div>
+      <div class="day-row"><div class="day-name">Tuesday</div><div class="day-tasks"><span class="topic">Writing unit files:</span> [Unit], [Service], [Install] sections. ExecStart, Restart=always, After=network.target, EnvironmentFile. <span class="practice">Write a unit file for a Python script you've made</span></div></div>
+      <div class="day-row"><div class="day-name">Wednesday</div><div class="day-tasks"><span class="topic">journald & logging:</span> journalctl flags — -u, -f, -b, --since, --until, -p. /var/log/ structure. logrotate config. rsyslog basics.</div></div>
+      <div class="day-row"><div class="day-name">Thursday</div><div class="day-tasks"><span class="topic">Bash scripting — start properly:</span> set -euo pipefail. Functions, local variables, return codes, $?, $#, $@. Argument parsing with getopts. <span class="resource">→ The Linux Command Line book, Ch 24–27</span></div></div>
+      <div class="day-row"><div class="day-name">Friday</div><div class="day-tasks"><span class="topic">Package management:</span> apt vs dnf internals. Repositories, GPG keys, held packages, pinning. rpm vs deb format differences. Building from source (./configure && make && make install).</div></div>
+      <div class="day-row"><div class="day-name">Saturday</div><div class="day-tasks"><span class="topic">Lab:</span> Set up a second VM (Rocky Linux 9 — your first RHEL-based system). Install and configure nginx. Write a systemd unit file for a custom service. Configure log rotation for it. Practice: break a service and diagnose it using journalctl alone.</div></div>
+      <div class="day-row"><div class="day-name">Sunday</div><div class="day-tasks day-off">Rest.</div></div>
+    </div>
+  </div>
+
+  <!-- WEEK 4 -->
+  <div class="week-block phase-a">
+    <div class="week-header" onclick="toggleWeek(this)">
+      <span class="week-num">Week 4</span>
+      <span class="week-title">Storage, LVM & SSH hardening</span>
+      <span class="week-focus">Storage & remote access</span>
+      <span class="week-chevron">▾</span>
+    </div>
+    <div class="week-body">
+      <div class="day-row"><div class="day-name">Monday</div><div class="day-tasks"><span class="topic">Storage fundamentals:</span> Block devices, partitions, MBR vs GPT, fdisk/gdisk, /proc/partitions. df, du, lsblk, blkid.</div></div>
+      <div class="day-row"><div class="day-name">Tuesday</div><div class="day-tasks"><span class="topic">Filesystems:</span> ext4, xfs, btrfs — when to use each. mkfs, mount, /etc/fstab, UUID mounting. tmpfs and ramfs.</div></div>
+      <div class="day-row"><div class="day-name">Wednesday</div><div class="day-tasks"><span class="topic">LVM (Logical Volume Manager):</span> Physical volumes → volume groups → logical volumes. pvcreate, vgcreate, lvcreate, lvextend, resize2fs. Snapshots. <span class="practice">Actually create, extend, and snapshot an LV in your lab</span></div></div>
+      <div class="day-row"><div class="day-name">Thursday</div><div class="day-tasks"><span class="topic">SSH hardening:</span> Key-based auth, /etc/ssh/sshd_config — disable root login, disable password auth, change port, AllowUsers. ssh_config on the client. ssh-agent, ssh-add, ProxyJump.</div></div>
+      <div class="day-row"><div class="day-name">Friday</div><div class="day-tasks"><span class="topic">Bash project day:</span> Write a disk usage alert script — checks all mounted filesystems, logs anything over a threshold, sends a formatted report. Error handling, logging, idempotent. <span class="resource">→ shellcheck.net to lint your scripts</span></div></div>
+      <div class="day-row"><div class="day-name">Saturday</div><div class="day-tasks"><span class="topic">Lab:</span> Add a new virtual disk to your VM. Partition it, format with ext4, mount persistently via fstab. Set up LVM on another disk, create a volume, extend it, take a snapshot. Harden SSH on both VMs — key auth only, no root login. Set up a jump host pattern between your two VMs.</div></div>
+      <div class="day-row"><div class="day-name">Sunday</div><div class="day-tasks day-off">Rest. Module A review — write down 5 things you're still fuzzy on and look them up.</div></div>
+    </div>
+  </div>
+
+  <div class="section-label">Module B — Networking internals (Weeks 5–10)</div>
+
+  <!-- WEEK 5 -->
+  <div class="week-block phase-b">
+    <div class="week-header" onclick="toggleWeek(this)">
+      <span class="week-num">Week 5</span>
+      <span class="week-title">TCP/IP internals & subnetting fluency</span>
+      <span class="week-focus">Packet level</span>
+      <span class="week-chevron">▾</span>
+    </div>
+    <div class="week-body">
+      <div class="day-row"><div class="day-name">Monday</div><div class="day-tasks"><span class="topic">OSI model operationalised:</span> Not just names — what tool operates at each layer. Where do ping, traceroute, tcpdump, curl, nmap each sit? Map your Security+ knowledge to real Linux commands.</div></div>
+      <div class="day-row"><div class="day-name">Tuesday</div><div class="day-tasks"><span class="topic">IP addressing deep dive:</span> Binary representation, class A/B/C history (and why it's obsolete), CIDR notation. Private ranges (10.x, 172.16-31.x, 192.168.x). Loopback, APIPA.</div></div>
+      <div class="day-row"><div class="day-name">Wednesday</div><div class="day-tasks"><span class="topic">Subnetting — become fast:</span> /24 → /30 binary math. Variable-length subnet masking (VLSM). <span class="practice">Practice: subnettingpractice.com — do 20 problems a day until you can do /24 splits in under 30 seconds mentally</span></div></div>
+      <div class="day-row"><div class="day-name">Thursday</div><div class="day-tasks"><span class="topic">TCP deep dive:</span> 3-way handshake, 4-way termination, sequence numbers, ACKs, sliding window, congestion control (CUBIC, BBR). What TIME_WAIT is and why it exists.</div></div>
+      <div class="day-row"><div class="day-name">Friday</div><div class="day-tasks"><span class="topic">UDP & ICMP:</span> When UDP beats TCP and why (DNS, streaming, gaming). ICMP types — echo, unreachable, TTL exceeded. How traceroute actually works (TTL trick).</div></div>
+      <div class="day-row"><div class="day-name">Saturday</div><div class="day-tasks"><span class="topic">Lab — Wireshark/tcpdump:</span> Capture a DNS query, HTTP request, and TCP handshake. Read the raw packets. Filter by protocol, port, IP. Understand every field in an IP header and TCP header. This is the most important Saturday of this module.</div></div>
+      <div class="day-row"><div class="day-name">Sunday</div><div class="day-tasks day-off">Rest. Keep doing subnetting practice (10 mins only).</div></div>
+    </div>
+  </div>
+
+  <!-- WEEK 6 -->
+  <div class="week-block phase-b">
+    <div class="week-header" onclick="toggleWeek(this)">
+      <span class="week-num">Week 6</span>
+      <span class="week-title">DNS internals & DHCP</span>
+      <span class="week-focus">Name resolution</span>
+      <span class="week-chevron">▾</span>
+    </div>
+    <div class="week-body">
+      <div class="day-row"><div class="day-name">Monday</div><div class="day-tasks"><span class="topic">DNS resolution step by step:</span> Recursive resolver → root servers → TLD → authoritative. What actually happens when you type google.com. Cache TTLs, negative caching.</div></div>
+      <div class="day-row"><div class="day-name">Tuesday</div><div class="day-tasks"><span class="topic">DNS record types:</span> A, AAAA, CNAME, MX, TXT, NS, SOA, PTR, SRV. When each is used. SPF, DKIM, DMARC records (ties to your Security+ background).</div></div>
+      <div class="day-row"><div class="day-name">Wednesday</div><div class="day-tasks"><span class="topic">DNS tools:</span> dig extensively — +trace, +short, @resolver, -t MX. nslookup (legacy). host. Read a full dig +trace output and explain every line. <span class="practice">Trace 5 different domains, compare resolver paths</span></div></div>
+      <div class="day-row"><div class="day-name">Thursday</div><div class="day-tasks"><span class="topic">DHCP mechanics:</span> DORA process (Discover, Offer, Request, Acknowledge). Lease times, reservations by MAC, DHCP relay agents. /var/lib/dhcp/dhclient.leases.</div></div>
+      <div class="day-row"><div class="day-name">Friday</div><div class="day-tasks"><span class="topic">Bash + networking:</span> Write scripts using curl, wget, dig, ping, nc (netcat). A script that checks if a list of hosts are reachable and logs results with timestamps.</div></div>
+      <div class="day-row"><div class="day-name">Saturday</div><div class="day-tasks"><span class="topic">Lab:</span> Set up a local DNS server (bind9 or dnsmasq) in a VM. Create A records for your lab VMs so they resolve by hostname. Set up DHCP for your lab network. Test with dig against your own resolver. Capture DNS traffic in Wireshark.</div></div>
+      <div class="day-row"><div class="day-name">Sunday</div><div class="day-tasks day-off">Rest.</div></div>
+    </div>
+  </div>
+
+  <!-- WEEK 7 -->
+  <div class="week-block phase-b">
+    <div class="week-header" onclick="toggleWeek(this)">
+      <span class="week-num">Week 7</span>
+      <span class="week-title">Routing, VLANs & NAT</span>
+      <span class="week-focus">Network architecture</span>
+      <span class="week-chevron">▾</span>
+    </div>
+    <div class="week-body">
+      <div class="day-row"><div class="day-name">Monday</div><div class="day-tasks"><span class="topic">Routing fundamentals:</span> ip route, routing tables, default gateway, static routes. How a packet decides which interface to leave from. Longest-prefix match.</div></div>
+      <div class="day-row"><div class="day-name">Tuesday</div><div class="day-tasks"><span class="topic">Dynamic routing overview:</span> OSPF and BGP concepts (you won't configure BGP yet, but know what it does). Why ISPs use BGP. AS numbers. Route redistribution concept.</div></div>
+      <div class="day-row"><div class="day-name">Wednesday</div><div class="day-tasks"><span class="topic">VLANs:</span> 802.1Q tagging, trunk vs access ports, inter-VLAN routing. How to segment a network into VLANs logically. Why you'd want to isolate a VLAN (security, broadcast domains).</div></div>
+      <div class="day-row"><div class="day-name">Thursday</div><div class="day-tasks"><span class="topic">NAT & PAT:</span> Source NAT, destination NAT, masquerade. How your home router gives you internet with one public IP. iptables MASQUERADE rule. Port forwarding.</div></div>
+      <div class="day-row"><div class="day-name">Friday</div><div class="day-tasks"><span class="topic">Linux as a router:</span> ip_forward, iptables NAT rules, setting up a Linux VM as a gateway. iproute2 toolkit — ip addr, ip link, ip route, ip neigh (ARP table).</div></div>
+      <div class="day-row"><div class="day-name">Saturday</div><div class="day-tasks"><span class="topic">Lab:</span> Set up pfSense VM as your lab router/firewall. Create two separate VM networks (subnets). Route between them through pfSense. Set up NAT so lab VMs can reach the internet through pfSense. Capture a packet leaving one subnet and arriving in another — see the TTL decrement and MAC change.</div></div>
+      <div class="day-row"><div class="day-name">Sunday</div><div class="day-tasks day-off">Rest.</div></div>
+    </div>
+  </div>
+
+  <!-- WEEK 8 -->
+  <div class="week-block phase-b">
+    <div class="week-header" onclick="toggleWeek(this)">
+      <span class="week-num">Week 8</span>
+      <span class="week-title">Firewalls — iptables & nftables</span>
+      <span class="week-focus">Traffic control</span>
+      <span class="week-chevron">▾</span>
+    </div>
+    <div class="week-body">
+      <div class="day-row"><div class="day-name">Monday</div><div class="day-tasks"><span class="topic">iptables architecture:</span> Tables (filter, nat, mangle, raw), chains (INPUT, OUTPUT, FORWARD, PREROUTING, POSTROUTING), rules, targets (ACCEPT, DROP, REJECT, LOG). Packet flow through all chains.</div></div>
+      <div class="day-row"><div class="day-name">Tuesday</div><div class="day-tasks"><span class="topic">Writing iptables rules:</span> Allow established/related, drop invalid, allow specific ports, rate limiting with hashlimit, logging dropped packets. iptables-save and iptables-restore. <span class="practice">Write a baseline firewall ruleset for a web server</span></div></div>
+      <div class="day-row"><div class="day-name">Wednesday</div><div class="day-tasks"><span class="topic">nftables:</span> The modern replacement for iptables. nft syntax, tables, chains, sets, maps. How to translate an iptables ruleset to nftables. ufw as a front-end (and what it does behind the scenes).</div></div>
+      <div class="day-row"><div class="day-name">Thursday</div><div class="day-tasks"><span class="topic">TLS/SSL internals:</span> Handshake steps (Client Hello → Server Hello → Certificate → Key Exchange → Finished). Cipher suites, certificate chains, SNI, OCSP. How Let's Encrypt works. openssl s_client to inspect a TLS connection.</div></div>
+      <div class="day-row"><div class="day-name">Friday</div><div class="day-tasks"><span class="topic">Bash — networking scripts:</span> Port scanner (using /dev/tcp or nc), service checker, SSL cert expiry checker. <span class="practice">Write a script that checks if a cert expires within 30 days and alerts</span></div></div>
+      <div class="day-row"><div class="day-name">Saturday</div><div class="day-tasks"><span class="topic">Lab:</span> Apply a proper iptables ruleset to your Ubuntu VM — default DROP, allow SSH, HTTP, HTTPS, established. Test each rule. Break one rule intentionally and diagnose why traffic is being dropped using iptables -v -n -L and tcpdump simultaneously. Repeat with nftables.</div></div>
+      <div class="day-row"><div class="day-name">Sunday</div><div class="day-tasks day-off">Rest.</div></div>
+    </div>
+  </div>
+
+  <div class="section-label">Module C — Bash scripting projects (Weeks 9–14, concurrent)</div>
+
+  <!-- WEEK 9–10 summary card -->
+  <div class="week-block phase-c">
+    <div class="week-header" onclick="toggleWeek(this)">
+      <span class="week-num">Weeks 9–10</span>
+      <span class="week-title">Advanced bash + system performance</span>
+      <span class="week-focus">Scripting & tuning</span>
+      <span class="week-chevron">▾</span>
+    </div>
+    <div class="week-body">
+      <div class="day-row"><div class="day-name">Week 9</div><div class="day-tasks"><span class="topic">System performance:</span> CPU — load average, context switches, iostat, mpstat. Memory — free, vmstat, /proc/meminfo, swap usage. I/O — iotop, iostat, iowait. What these numbers mean and when to be alarmed. <span class="resource">→ Brendan Gregg's Linux Performance tools poster (free, legendary)</span></div></div>
+      <div class="day-row"><div class="day-name">Week 10</div><div class="day-tasks"><span class="topic">Advanced bash:</span> Here-docs, process substitution, coprocesses. Bash arrays (indexed and associative). String manipulation without external tools. Trap signals in scripts for cleanup. Parallel execution with & and wait. <span class="practice">Build a sysinfo report script that outputs structured data for all metrics learned so far</span></div></div>
+    </div>
+  </div>
+
+  <div class="section-label">Module D — Integration & capstone (Weeks 11–20)</div>
+
+  <!-- WEEK 11–14 -->
+  <div class="week-block phase-d">
+    <div class="week-header" onclick="toggleWeek(this)">
+      <span class="week-num">Weeks 11–14</span>
+      <span class="week-title">Security hardening, NFS/Samba & automation</span>
+      <span class="week-focus">Production patterns</span>
+      <span class="week-chevron">▾</span>
+    </div>
+    <div class="week-body">
+      <div class="day-row"><div class="day-name">Week 11</div><div class="day-tasks"><span class="topic">Linux hardening:</span> CIS Benchmark for Ubuntu/Rocky. SELinux (on Rocky) and AppArmor (on Ubuntu) — modes, profiles, audit2allow. Fail2ban config. sysctl security parameters (/etc/sysctl.conf). auditd for system call auditing.</div></div>
+      <div class="day-row"><div class="day-name">Week 12</div><div class="day-tasks"><span class="topic">Network file systems:</span> NFS v4 — exports, mount options, security (Kerberos optional). Samba — smb.conf, shares, auth. AutoFS for automounting. <span class="practice">Lab: set up shared NFS storage between your VMs, used by a service on both</span></div></div>
+      <div class="day-row"><div class="day-name">Week 13</div><div class="day-tasks"><span class="topic">Network monitoring:</span> nmap for host discovery and port scanning. netstat/ss — understand every column. Bandwidth monitoring: iftop, nethogs, nload. Detecting suspicious connections.</div></div>
+      <div class="day-row"><div class="day-name">Week 14</div><div class="day-tasks"><span class="topic">Bash capstone project:</span> Write a full server health monitoring script. Checks CPU, memory, disk, zombie processes, failed systemd services, open ports vs expected, SSL cert expiry. Outputs a structured report. Runs via cron. Sends alert to a log file (and optionally email via mailx). <span class="resource">→ This becomes a portfolio piece</span></div></div>
+    </div>
+  </div>
+
+  <!-- WEEK 15–20 -->
+  <div class="week-block phase-d">
+    <div class="week-header" onclick="toggleWeek(this)">
+      <span class="week-num">Weeks 15–20</span>
+      <span class="week-title">Capstone lab build & phase review</span>
+      <span class="week-focus">Portfolio + readiness</span>
+      <span class="week-chevron">▾</span>
+    </div>
+    <div class="week-body">
+      <div class="day-row"><div class="day-name">Weeks 15–17</div><div class="day-tasks"><span class="topic">Full lab environment build:</span> Multi-VM network with pfSense router, Ubuntu web server, Rocky Linux app server, NFS storage VM. All hardened, all monitored by your scripts, all SSH key-only. Documented with a network diagram and runbook. This is your Phase 1 capstone.</div></div>
+      <div class="day-row"><div class="day-name">Weeks 18–19</div><div class="day-tasks"><span class="topic">Deep review + gap filling:</span> Go back to anything you felt shaky on. Do the OverTheWire: Natas challenges (web/networking focused). Re-read your notes. Explain concepts out loud as if teaching someone else.</div></div>
+      <div class="day-row"><div class="day-name">Week 20</div><div class="day-tasks"><span class="topic">Optional: CompTIA Linux+:</span> If you've done the work, this cert now takes 2–3 weeks of focused prep (not 3 months). Use Professor Messer and Jason Dion practice exams. You'll pass comfortably. This is a nice credential but not the goal — the skills are. Then: begin Phase 2.</div></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════ LAB ═══════════════════════════ -->
+<div class="panel" id="panel-lab">
+
+  <div class="section-label">Progressive lab projects</div>
+  <p style="color:var(--muted); font-size:13.5px; margin-bottom:1.5rem; line-height:1.7">These build on each other. Each one is a real thing you've built that you can talk about in an interview. Document everything in a GitHub repo with a README — this becomes your portfolio.</p>
+
+  <div class="project-card proj-purple">
+    <div class="project-num">Project 01 · Week 1–2</div>
+    <div class="project-title">Hardened SSH jump host</div>
+    <div class="project-body">Set up an Ubuntu Server VM accessible only via SSH key auth. Disable root login, disable password auth, change the default port, configure AllowUsers. Set up a second VM that's only accessible by jumping through the first. Write a bash script that automates the hardening steps idempotently — run it twice and the second run makes no changes.</div>
+    <div class="project-goals">
+      <span class="goal-tag">SSH config mastery</span>
+      <span class="goal-tag">Idempotent scripting</span>
+      <span class="goal-tag">ProxyJump pattern</span>
+      <span class="goal-tag">Portfolio: GitHub README</span>
+    </div>
+  </div>
+
+  <div class="project-card proj-green">
+    <div class="project-num">Project 02 · Week 3–4</div>
+    <div class="project-title">Self-healing web service</div>
+    <div class="project-body">Deploy nginx as a systemd service on Rocky Linux. Write a custom systemd unit file with Restart=always and a startup delay. Add a watchdog script (run by a timer unit, not cron) that checks if nginx responds to an HTTP request — if it fails 3 times, it logs the failure and restarts the service. Set up log rotation for nginx and your watchdog logs.</div>
+    <div class="project-goals">
+      <span class="goal-tag">systemd units & timers</span>
+      <span class="goal-tag">Service health checking</span>
+      <span class="goal-tag">Log rotation</span>
+      <span class="goal-tag">Rocky Linux (RHEL family)</span>
+    </div>
+  </div>
+
+  <div class="project-card proj-amber">
+    <div class="project-num">Project 03 · Week 5–8</div>
+    <div class="project-title">Lab network with pfSense</div>
+    <div class="project-body">Build a proper internal lab network. pfSense VM acts as the router and DHCP server. Two isolated subnets: one for "web" VMs, one for "db" VMs. Set up firewall rules so web VMs can only talk to db VMs on port 5432. DB VMs cannot initiate connections to web VMs. Set up your local DNS so all VMs resolve by hostname. Capture and document the traffic flow with Wireshark.</div>
+    <div class="project-goals">
+      <span class="goal-tag">pfSense router/firewall</span>
+      <span class="goal-tag">Multi-subnet design</span>
+      <span class="goal-tag">Firewall rules (real use case)</span>
+      <span class="goal-tag">Local DNS</span>
+      <span class="goal-tag">Wireshark analysis</span>
+    </div>
+  </div>
+
+  <div class="project-card proj-teal">
+    <div class="project-num">Project 04 · Week 9–14</div>
+    <div class="project-title">Server health monitoring system</div>
+    <div class="project-body">A complete bash monitoring suite. Runs via cron on every VM in your lab. Checks: CPU load (alert if &gt;80% sustained), memory usage, disk usage per mount point, zombie processes, failed systemd services, unexpected open ports (compares current ss output against a known-good baseline), SSL cert expiry for any HTTPS services. Outputs a structured daily report. Aggregates reports from all VMs via NFS shared storage. One master script you run to see the health of your entire lab.</div>
+    <div class="project-goals">
+      <span class="goal-tag">Production bash scripting</span>
+      <span class="goal-tag">Multi-host awareness</span>
+      <span class="goal-tag">NFS integration</span>
+      <span class="goal-tag">Baseline deviation detection</span>
+      <span class="goal-tag">Portfolio centrepiece</span>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════ RESOURCES ═══════════════════════════ -->
+<div class="panel" id="panel-resources">
+
+  <div class="section-label">Linux</div>
+  <table class="res-table">
+    <thead><tr><th>Resource</th><th>What it covers</th><th>Cost</th></tr></thead>
+    <tbody>
+      <tr><td>Linux Journey<br><small style="font-weight:400;color:var(--subtle)">linuxjourney.com</small></td><td>Interactive Linux fundamentals, great for weeks 1–3</td><td><span class="free-badge">FREE</span></td></tr>
+      <tr><td>The Linux Command Line<br><small style="font-weight:400;color:var(--subtle)">William Shotts — linuxcommand.org</small></td><td>The definitive bash and command-line book. Chapters 19–27 are essential. Read cover to cover.</td><td><span class="free-badge">FREE PDF</span></td></tr>
+      <tr><td>OverTheWire: Bandit<br><small style="font-weight:400;color:var(--subtle)">overthewire.org/wargames/bandit</small></td><td>SSH + Linux command line challenges. Gamified. Levels 0–30. Essential hands-on practice.</td><td><span class="free-badge">FREE</span></td></tr>
+      <tr><td>Linux Performance (Brendan Gregg)<br><small style="font-weight:400;color:var(--subtle)">brendangregg.com/linuxperf.html</small></td><td>The definitive performance tools reference. Free poster and in-depth articles.</td><td><span class="free-badge">FREE</span></td></tr>
+      <tr><td>RHCSA/RHCE Study Guide<br><small style="font-weight:400;color:var(--subtle)">Sander van Vugt — book or Acloud.guru course</small></td><td>Goes deep on RHEL/Rocky Linux. Good for weeks 10+. Not required, but thorough.</td><td><span class="paid-badge">PAID</span></td></tr>
+    </tbody>
+  </table>
+
+  <div class="section-label">Networking</div>
+  <table class="res-table">
+    <thead><tr><th>Resource</th><th>What it covers</th><th>Cost</th></tr></thead>
+    <tbody>
+      <tr><td>Professor Messer Network+<br><small style="font-weight:400;color:var(--subtle)">professormesser.com</small></td><td>Free video series covering all networking fundamentals. Supplement your Security+ knowledge with this.</td><td><span class="free-badge">FREE</span></td></tr>
+      <tr><td>Subnetting Practice<br><small style="font-weight:400;color:var(--subtle)">subnettingpractice.com</small></td><td>Drill subnetting until it's automatic. Do 20 problems daily in weeks 5–7.</td><td><span class="free-badge">FREE</span></td></tr>
+      <tr><td>Practical Networking<br><small style="font-weight:400;color:var(--subtle)">youtube.com/@PracticalNetworking</small></td><td>Excellent deep-dive videos on routing, ARP, NAT, DNS. Some of the best free networking content available.</td><td><span class="free-badge">FREE</span></td></tr>
+      <tr><td>Computer Networks: A Top-Down Approach<br><small style="font-weight:400;color:var(--subtle)">Kurose & Ross</small></td><td>The academic standard. Heavy but thorough. Use as a reference, not a cover-to-cover read.</td><td><span class="paid-badge">PAID</span></td></tr>
+      <tr><td>Wireshark Course (Chris Greer)<br><small style="font-weight:400;color:var(--subtle)">YouTube — free series</small></td><td>Practical packet analysis. Essential for week 5's Saturday lab session.</td><td><span class="free-badge">FREE</span></td></tr>
+    </tbody>
+  </table>
+
+  <div class="section-label">Lab setup</div>
+  <table class="res-table">
+    <thead><tr><th>Resource</th><th>What it covers</th></tr></thead>
+    <tbody>
+      <tr><td>Proxmox VE<br><small style="font-weight:400;color:var(--subtle)">proxmox.com</small></td><td>Free enterprise hypervisor. Install on a spare PC. The closest thing to a real data centre in your bedroom.</td></tr>
+      <tr><td>VirtualBox<br><small style="font-weight:400;color:var(--subtle)">virtualbox.org</small></td><td>Free, runs on your current machine. Sufficient for most of this phase. Slower and less realistic than Proxmox.</td></tr>
+      <tr><td>pfSense CE<br><small style="font-weight:400;color:var(--subtle)">pfsense.org</small></td><td>Free open-source firewall/router. Run as a VM. Used by real enterprises.</td></tr>
+      <tr><td>Ubuntu Server 24.04 LTS<br><small style="font-weight:400;color:var(--subtle)">ubuntu.com/download/server</small></td><td>Primary Debian-family VM. LTS = Long Term Support — used in production everywhere.</td></tr>
+      <tr><td>Rocky Linux 9<br><small style="font-weight:400;color:var(--subtle)">rockylinux.org</small></td><td>RHEL-compatible. Most enterprise environments are RHEL-based. Essential to know both families.</td></tr>
+    </tbody>
+  </table>
+
+</div>
+
+<!-- ═══════════════════════════ CHECKLIST ═══════════════════════════ -->
+<div class="panel" id="panel-checklist">
+
+  <p style="color:var(--muted); font-size:13.5px; margin-bottom:1.5rem; line-height:1.7">You're ready for Phase 2 when you can confidently do <em>all</em> of these from memory, in a live terminal, without googling. Be honest with yourself — these are the real bar.</p>
+
+  <div class="section-label">Linux</div>
+  <ul class="checklist">
+    <li><div><strong>Explain the Linux boot process</strong> from power-on to login prompt, naming each stage and what could go wrong at each</div></li>
+    <li><div><strong>Diagnose a slow or unresponsive server</strong> using only top, iostat, vmstat, ss, journalctl — and name the most likely cause from the output</div></li>
+    <li><div><strong>Set up a new user</strong> with specific sudo privileges (only certain commands), correct primary group, home directory, and SSH key — without a GUI</div></li>
+    <li><div><strong>Create and extend an LVM logical volume</strong> on a new disk, mount it persistently, and take a snapshot — all from scratch</div></li>
+    <li><div><strong>Write a systemd unit file</strong> for a custom service with proper restart policy, environment file, and dependency ordering</div></li>
+    <li><div><strong>Diagnose why a service failed</strong> using journalctl alone, fix it, and prevent the issue recurring</div></li>
+    <li><div><strong>Write a production bash script</strong> with proper error handling (set -euo pipefail), logging, argument parsing, and idempotency</div></li>
+    <li><div><strong>Harden a fresh Linux server</strong> — SSH key-only, no root login, firewall baseline, fail2ban, disable unnecessary services — without a guide</div></li>
+  </ul>
+
+  <div class="section-label">Networking</div>
+  <ul class="checklist">
+    <li><div><strong>Subnet any /24 network</strong> into any prefix length (/25 through /30) in under 60 seconds, mentally</div></li>
+    <li><div><strong>Trace a DNS query</strong> step by step with dig +trace and explain every line of output</div></li>
+    <li><div><strong>Capture and read a TCP 3-way handshake</strong> in Wireshark/tcpdump and explain each packet's fields</div></li>
+    <li><div><strong>Write an iptables ruleset</strong> for a web server — default DROP, allow SSH, HTTP, HTTPS, established, reject all else — and test it</div></li>
+    <li><div><strong>Set up routing between two subnets</strong> using a Linux VM as the router, with correct iptables NAT rules</div></li>
+    <li><div><strong>Explain TLS handshake steps</strong> and inspect a real connection with openssl s_client</div></li>
+    <li><div><strong>Diagnose a network connectivity issue</strong> using ping, traceroute, ss, tcpdump, dig — and know which tool to reach for first at each layer</div></li>
+  </ul>
+
+  <div class="section-label">Lab</div>
+  <ul class="checklist">
+    <li><div><strong>Your lab runs all 4 projects</strong> — jump host, self-healing service, pfSense network, monitoring system — and they work</div></li>
+    <li><div><strong>Your GitHub repo is documented</strong> — each project has a README explaining what it does, how to set it up, and what you learned</div></li>
+    <li><div><strong>You've broken and recovered from</strong> at least: a corrupted fstab, a misconfigured sshd_config that locked you out, a firewall rule that dropped all traffic, a failed service that wouldn't restart</div></li>
+  </ul>
+
+</div>
+
+<script>
+  function switchTab(id, btn) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('panel-' + id).classList.add('active');
+    btn.classList.add('active');
+  }
+
+  function toggleWeek(header) {
+    const body = header.nextElementSibling;
+    const chevron = header.querySelector('.week-chevron');
+    const isOpen = body.classList.contains('open');
+    body.classList.toggle('open', !isOpen);
+    chevron.classList.toggle('open', !isOpen);
+  }
+</script>
+</body>
+</html>
